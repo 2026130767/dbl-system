@@ -875,9 +875,7 @@ async function confirmarCompra(){
   const btn=document.querySelector('#formFornecedor .btn-confirmar');
   btn.disabled=true;btn.textContent='Salvando…';
   try{
-    // Converter data para DD/MM/YYYY
-    const pC=dados.dataFaturamento.split('-');
-    dados.dataFaturamento=pC[2]+'/'+pC[1]+'/'+pC[0];
+  
     const r=await chamarAPI({...dados,action:'lancarCompra',simulacao:false});
     if(r.ok){toast('Pedido '+r.numPedido+' registrado!');document.getElementById('compraFornecedor').value='';document.getElementById('compraPrazo').value='';document.getElementById('compraValor').value='';document.getElementById('simResultado').style.display='none';mudarAba('painel');renderizarPainel();}
     else toast(r.erro||'Erro.','erro');
