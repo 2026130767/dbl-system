@@ -474,7 +474,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbx63sw4IC0ZINJjOrp6RSv4gZGshhE8Ahug_ogOp-sT7l-jLCx0GMgffnEGLsr7Tio3/exec';
-const SENHAS = {'fvn2026':'marcio','dbl2026':'rodnei'};
+let senhaAtual = '';
 let perfil = null;
 let vendas_novos = [];
 let recorrentes = [];
@@ -514,7 +514,7 @@ function toast(msg,tipo){const t=document.getElementById('toast');t.textContent=
 function dataHoje(){return new Date().toISOString().split('T')[0];}
 
 async function chamarAPI(dados){
-  const r=await fetch(API+'?action='+dados.action,{method:'POST',body:JSON.stringify(dados),headers:{'Content-Type':'text/plain'}});
+  if(senhaAtual && !dados.senha) dados.senha = senhaAtual; const r=await fetch(API+'?action='+dados.action,{method:'POST',body:JSON.stringify(dados),headers:{'Content-Type':'text/plain'}});
   return r.json();
 }
 
@@ -585,15 +585,15 @@ function fazerLogin(){
   const senha=document.getElementById('inputSenha').value;
   const erro=document.getElementById('erroLogin');
   if(!senha)return;
-  if(SENHAS[senha]){
-    perfil=SENHAS[senha];
+  chamarAPI({action:'login',senha:senha}).then(function(resp){ if(resp&&resp.ok){
+    senhaAtual=senha; perfil=resp.perfil;
     document.getElementById('telaLogin').style.display='none';
     document.getElementById('telaApp').classList.add('ativo');
     document.getElementById('lblUsuario').textContent=perfil==='marcio'?'Marcio (gestor)':'Rodnei';
     erro.style.display='none';
     document.getElementById('lblAtualizado').textContent='Carregando dados...';
     carregarDadosSheets().then(() => renderizarPainel());
-  }else{erro.style.display='block';}
+  }else{erro.style.display='block';} });
 }
 document.getElementById('inputSenha').addEventListener('keydown',e=>{if(e.key==='Enter')fazerLogin();});
 
