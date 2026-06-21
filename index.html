@@ -770,14 +770,22 @@ function renderizarHistorico(){
   }).join('');
 }
 
-async function carregarComprometimento(){
-  try{
-    const r=await chamarAPI({action:'getPainel'});
-    if(r.ok&&r.comprometimento){
-      r.comprometimento.forEach(m=>{m.pct=HIST.mediaMes>0?m.volume/HIST.mediaMes:0;m.status=m.pct<=0.35?'ok':m.pct<=0.40?'atencao':'acima';});
-      renderizarComprometimento(r.comprometimento);
-    }else renderizarComprometimento([]);
-  }catch(e){renderizarComprometimento([]);}
+function carregarComprometimento(){
+  const nomes={'2026-06':'jun. de 26','2026-07':'jul. de 26','2026-08':'ago. de 26','2026-09':'set. de 26','2026-10':'out. de 26'};
+  const compPorMes={};
+  PARCELAS_HIST.forEach(p=>{const mes=String(p[2]).substring(0,7);if(!compPorMes[mes])compPorMes[mes]=0;compPorMes[mes]+=p[3];});
+  PARCELAS_SHEETS.forEach(p=>{const mes=String(p[2]).substring(0,7);if(!compPorMes[mes])compPorMes[mes]=0;compPorMes[mes]+=p[3];});
+  const hoje=new Date();
+  const meses=[];
+  for(let i=1;i<=3;i++){const d=new Date(hoje.getFullYear(),hoje.getMonth()+i,1);meses.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));}
+  const mediaMesHist=79515.71;
+  const comp=meses.map(k=>{
+    const volume=compPorMes[k]||0;
+    const pctv=mediaMesHist>0?volume/mediaMesHist:0;
+    const status=pctv<=0.35?'ok':pctv<=0.40?'atencao':'acima';
+    return {mes:nomes[k]||k,volume:volume,pct:pctv,status:status};
+  });
+  renderizarComprometimento(comp);
 }
 
 function renderizarComprometimento(comp){
