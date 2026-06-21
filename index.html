@@ -480,7 +480,7 @@ let vendas_novos = [];
 let recorrentes = [];
 let relAtual = {tipo:'compras', modo:'vencimento'};
 
-const HIST = {
+let HIST = {
   mediaMes:79515.71, mediaDia:3262.18,
   modalidades:{
     boleto:{valor:29618.74,pct:0.3725},pixTel:{valor:5678.76,pct:0.0714},
@@ -493,7 +493,7 @@ let JUN_BASE = {diasLancados:0,totalMes:0,boleto:0,pixTel:0,dinheiro:0,debito:0,
 let DADOS_SHEETS = []; // dados reais do Sheets
 let PARCELAS_SHEETS = []; // parcelas reais do Sheets
 let dadosCarregados = false;
-const HIST_MENSAL = [
+let HIST_MENSAL = [
   {mes:'Out/25',total:95407.85,boleto:44.8,pixTel:7.6,dinheiro:14.2,debito:15.3,credito:12.2,pixBalcao:5.9,compras:null},
   {mes:'Nov/25',total:79764.67,boleto:43.3,pixTel:6.2,dinheiro:13.0,debito:17.2,credito:16.7,pixBalcao:3.8,compras:null},
   {mes:'Dez/25',total:86858.57,boleto:25.1,pixTel:6.1,dinheiro:20.7,debito:24.9,credito:16.4,pixBalcao:7.4,compras:null},
@@ -573,7 +573,9 @@ async function carregarDadosSheets() {
         if (idx === -1) PARCELAS_HIST.push(p);
       });
     }
-    dadosCarregados = true;
+ const rh = await chamarAPI({action:'getHistorico'});
+if (rh.ok && rh.hist) { HIST = rh.hist; HIST_MENSAL = rh.histMensal; }
+dadosCarregados = true;
   } catch(e) {
     console.log('Erro ao carregar:', e);
   }
