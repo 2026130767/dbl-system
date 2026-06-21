@@ -573,7 +573,7 @@ async function carregarDadosSheets() {
         if (idx === -1) PARCELAS_HIST.push(p);
       });
     }
- const rh = await chamarAPI({action:'getHistorico'});
+ calcularHistorico();
 if (rh.ok && rh.hist) { HIST = rh.hist; HIST_MENSAL = rh.histMensal; }
 dadosCarregados = true;
   } catch(e) {
@@ -650,7 +650,49 @@ document.getElementById('compraFornecedor').addEventListener('change',function()
 
 function calcularDiasUteis(ano,mes){const total=new Date(ano,mes+1,0).getDate();let c=0;for(let d=1;d<=total;d++)if(new Date(ano,mes,d).getDay()!==0)c++;return c;}
 
-function renderizarPainel(){
+function calcularHistorico(){
+  var hj = new Date(), mA = hj.getMonth(), aA = hj.getFullYear();
+  var mm = {}, dd = {};
+  VENDAS_HIST.forEach(function(v){
+    var d = new Date(v[0]+'T12:00:00');
+    if (d.getMonth()===mA && d.getFullYear()===aA) return;
+    var k = d.getFullYear()+'-'+(d.getMonth()+1);
+    if(!mm[k]){mm[k]={t:0,b:0,pt:0,di:0,de:0,cr:0,pb:0};dd[k]=0;}
+    mm[k].t+=v[7];mm[k].b+=v[1];mm[k].pt+=v[2];mm[k].di+=v[3];mm[k].de+=v[4];mm[k].cr+=v[5];mm[k].pb+=v[6];dd[k]++;
+  });
+  var ks = Object.keys(mm), n = ks.length;
+  if (n === 0) return;
+  var sT=0,sB=0,sPT=0,sDI=0,sDE=0,sCR=0,sPB=0,sD=0;
+  ks.forEach(function(k){var m=mm[k];sT+=m.t;sB+=m.b;sPT+=m.pt;sDI+=m.di;sDE+=m.de;sCR+=m.cr;sPB+=m.pb;sD+=dd[k];});
+  var med = sT/n;
+  HIST = {
+    mediaMes: med,
+    mediaDia: sD>0 ? sT/sD : HIST.mediaDia,
+    modalidades: {
+      boleto:{valor:sB/n, pct:med>0?(sB/n)/med:0},
+      pixTel:{valor:sPT/n, pct:med>0?(sPT/n)/med:0},
+      dinheiro:{valor:sDI/n, pct:med>0?(sDI/n)/med:0},
+      debito:{valor:sDE/n, pct:med>0?(sDE/n)/med:0},
+      credito:{valor:sCR/n, pct:med>0?(sCR/n)/med:0},
+      pixBalcao:{valor:sPB/n, pct:med>0?(sPB/n)/med:0}
+    }
+  };
+  var tb = document.getElementById('tabelaHistorico');
+  if (tb && tb.parentNode) {
+    var tf = tb.parentNode.querySelector('tfoot tr');
+    if (tf) {
+      var M = HIST.modalidades;
+      tf.innerHTML = '<td>Média</td><td class="r" style="color:var(--azul)">'+brl(HIST.mediaMes)+'</td>'+
+        '<td class="r">'+pct(M.boleto.pct)+'</td>'+
+        '<td class="r">'+pct(M.pixTel.pct)+'</td>'+
+        '<td class="r">'+pct(M.dinheiro.pct)+'</td>'+
+        '<td class="r">'+pct(M.debito.pct)+'</td>'+
+        '<td class="r">'+pct(M.credito.pct)+'</td>'+
+        '<td class="r">'+pct(M.pixBalcao.pct)+'</td>'+
+        '<td class="r">—</td>';
+    }
+  }
+}function renderizarPainel(){
   const agora=new Date();
   document.getElementById('lblAtualizado').textContent='Atualizado '+agora.toLocaleDateString('pt-BR')+' às '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   let total=JUN_BASE.totalMes,dias=JUN_BASE.diasLancados;
