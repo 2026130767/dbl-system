@@ -769,7 +769,7 @@ function renderizarHistoricoSheets() {
     const m = meses[k];
     const t = m.total || 1;
     const compMes = compPorMes[k] || 0;
-    const mediaMesHist = 79515.71;
+    const mediaMesHist = HIST.mediaMes;
     const compPct = compMes > 0 ? (compMes/mediaMesHist*100) : null;
     return {
       mes: nomes[k] || k,
@@ -822,7 +822,7 @@ function carregarComprometimento(){
   const hoje=new Date();
   const meses=[];
   for(let i=1;i<=3;i++){const d=new Date(hoje.getFullYear(),hoje.getMonth()+i,1);meses.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));}
-  const mediaMesHist=79515.71;
+  const mediaMesHist=HIST.mediaMes;
   const comp=meses.map(k=>{
     const volume=compPorMes[k]||0;
     const pctv=mediaMesHist>0?volume/mediaMesHist:0;
