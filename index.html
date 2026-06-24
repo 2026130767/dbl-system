@@ -921,7 +921,7 @@ async function confirmarCompra(){
   try{
   
     const r=await chamarAPI({...dados,action:'lancarCompra',simulacao:false});
-    if(r.ok){toast('Pedido '+r.numPedido+' registrado!');document.getElementById('compraFornecedor').value='';document.getElementById('compraPrazo').value='';document.getElementById('compraValor').value='';document.getElementById('simResultado').style.display='none';renderizarPainel();}
+    if(r.ok){const rp=await chamarAPI({action:'getParcelas'});if(rp.ok&&rp.parcelas){rp.parcelas.forEach(function(p){var ix=PARCELAS_HIST.findIndex(function(h){return h[0]===p[0]&&h[2]===p[2];});if(ix===-1)PARCELAS_HIST.push(p);});}toast('Pedido '+r.numPedido+' registrado!');document.getElementById('compraFornecedor').value='';document.getElementById('compraPrazo').value='';document.getElementById('compraValor').value='';document.getElementById('simResultado').style.display='none';renderizarPainel();}
     else toast(r.erro||'Erro.','erro');
   }catch(e){toast('Erro de conexão.','erro');}
   btn.disabled=false;btn.textContent='Confirmar pedido';
