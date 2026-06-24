@@ -864,7 +864,7 @@ async function confirmarVendas(){
   btn.disabled=true;btn.textContent='Salvando…';
   try{
     const r=await chamarAPI({action:'lancarVendas',data:dataFmt,boleto:b,pixTel:pt,dinheiro:di,debito:de,credito:cr,pixBalcao:pb});
-    if(r.ok){vendas_novos.push({total,boleto:b,pixTel:pt,dinheiro:di,debito:de,credito:cr,pixBalcao:pb});toast('Vendas lançadas!');['vendaBoleto','vendaPixTel','vendaDinheiro','vendaDebito','vendaCredito','vendaPixBalcao'].forEach(id=>document.getElementById(id).value='');mudarAba('painel');renderizarPainel();}
+    if(r.ok){vendas_novos.push({total,boleto:b,pixTel:pt,dinheiro:di,debito:de,credito:cr,pixBalcao:pb});toast('Vendas lançadas!');['vendaBoleto','vendaPixTel','vendaDinheiro','vendaDebito','vendaCredito','vendaPixBalcao'].forEach(id=>document.getElementById(id).value='');renderizarPainel();}
     else toast(r.erro||'Erro.','erro');
   }catch(e){toast('Erro de conexão.','erro');}
   btn.disabled=false;btn.textContent='Confirmar lançamento';
@@ -921,7 +921,7 @@ async function confirmarCompra(){
   try{
   
     const r=await chamarAPI({...dados,action:'lancarCompra',simulacao:false});
-    if(r.ok){toast('Pedido '+r.numPedido+' registrado!');document.getElementById('compraFornecedor').value='';document.getElementById('compraPrazo').value='';document.getElementById('compraValor').value='';document.getElementById('simResultado').style.display='none';mudarAba('painel');renderizarPainel();}
+    if(r.ok){toast('Pedido '+r.numPedido+' registrado!');document.getElementById('compraFornecedor').value='';document.getElementById('compraPrazo').value='';document.getElementById('compraValor').value='';document.getElementById('simResultado').style.display='none';renderizarPainel();}
     else toast(r.erro||'Erro.','erro');
   }catch(e){toast('Erro de conexão.','erro');}
   btn.disabled=false;btn.textContent='Confirmar pedido';
