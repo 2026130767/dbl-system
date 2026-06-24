@@ -864,7 +864,7 @@ async function confirmarVendas(){
   btn.disabled=true;btn.textContent='Salvando…';
   try{
     const r=await chamarAPI({action:'lancarVendas',data:dataFmt,boleto:b,pixTel:pt,dinheiro:di,debito:de,credito:cr,pixBalcao:pb});
-    if(r.ok){vendas_novos.push({total,boleto:b,pixTel:pt,dinheiro:di,debito:de,credito:cr,pixBalcao:pb});toast('Vendas lançadas!');['vendaBoleto','vendaPixTel','vendaDinheiro','vendaDebito','vendaCredito','vendaPixBalcao'].forEach(id=>document.getElementById(id).value='');renderizarPainel();}
+    if(r.ok){vendas_novos.push({total,boleto:b,pixTel:pt,dinheiro:di,debito:de,credito:cr,pixBalcao:pb});VENDAS_HIST.push([data,b,pt,di,de,cr,pb,total]);VENDAS_HIST.sort(function(x,y){return String(x[0]).localeCompare(String(y[0]));});toast('Vendas lançadas!');['vendaBoleto','vendaPixTel','vendaDinheiro','vendaDebito','vendaCredito','vendaPixBalcao'].forEach(id=>document.getElementById(id).value='');renderizarPainel();}
     else toast(r.erro||'Erro.','erro');
   }catch(e){toast('Erro de conexão.','erro');}
   btn.disabled=false;btn.textContent='Confirmar lançamento';
