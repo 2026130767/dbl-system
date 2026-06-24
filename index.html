@@ -317,7 +317,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <input type="number" class="form-input" id="vendaPixBalcao" placeholder="0,00" min="0" step="0.01">
         </div>
         <div class="form-acoes">
-          <button class="btn-confirmar" onclick="confirmarVendas()">Confirmar lançamento</button>
+          <button class="btn-confirmar" onclick="confirmarVendas()">Confirmar lançamento</button><div id="apagarVendaBox" style="margin-top:18px;padding-top:14px;border-top:1px solid var(--cinza-borda)"><div style="font-size:12px;font-weight:600;color:var(--cinza-texto);margin-bottom:8px">CORRIGIR / APAGAR UM DIA JÁ LANÇADO</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="date" id="apagarVendaData" class="form-input" style="flex:1;min-width:140px"><button onclick="apagarVenda()" style="padding:10px 16px;background:var(--vermelho);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;white-space:nowrap">Apagar este dia</button></div><div class="form-hint" style="margin-top:6px">Escolha a data do dia que quer remover. O sistema pede confirmação antes de apagar.</div></div>
         </div>
       </div>
     </div>
@@ -846,7 +846,7 @@ function renderizarComprometimento(comp){
   document.getElementById('totalExp').textContent=brl(totalExp);
 }
 
-async function confirmarVendas(){
+async function apagarVenda(){var d=document.getElementById('apagarVendaData').value;if(!d){toast('Escolha a data do dia que quer apagar.','erro');return;}var dataFmt=d.split('-').reverse().join('/');if(!confirm('Apagar o lançamento de vendas de '+dataFmt+'? Esta ação não pode ser desfeita.'))return;var r=await chamarAPI({action:'apagarVendas',data:d});if(r.ok){alert('Lançamento de '+dataFmt+' apagado com sucesso. A tela vai recarregar.');location.reload();}else{toast(r.erro||'Erro ao apagar.','erro');}}async function apagarVenda(){var d=document.getElementById('apagarVendaData').value;if(!d){toast('Escolha a data do dia que quer apagar.','erro');return;}var dataFmt=d.split('-').reverse().join('/');if(!confirm('Apagar o lançamento de vendas de '+dataFmt+'? Esta ação não pode ser desfeita.'))return;var r=await chamarAPI({action:'apagarVendas',data:d});if(r.ok){alert('Lançamento de '+dataFmt+' apagado com sucesso. A tela vai recarregar.');location.reload();}else{toast(r.erro||'Erro ao apagar.','erro');}}async function confirmarVendas(){
   const data=document.getElementById('vendaData').value;
   if(!data){toast('Informe a data.','erro');return;}
   const b=Number(document.getElementById('vendaBoleto').value)||0;
