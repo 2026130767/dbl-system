@@ -366,7 +366,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           </div>
           <div class="form-acoes">
             <button class="btn-simular" onclick="simularCompra()">Simular impacto antes de confirmar</button>
-            <button class="btn-confirmar" onclick="confirmarCompra()">Confirmar pedido</button><div id="compraConfirmacao" style="display:none;padding:12px 16px;background:var(--verde-fundo);border:1px solid var(--verde);border-radius:var(--radius-sm);color:var(--verde);font-weight:600;font-size:14px"></div>
+            <button class="btn-confirmar" onclick="confirmarCompra()">Confirmar pedido</button><div id="compraConfirmacao" style="display:none;padding:12px 16px;background:var(--verde-fundo);border:1px solid var(--verde);border-radius:var(--radius-sm);color:var(--verde);font-weight:600;font-size:14px"></div><div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--cinza-borda)"><div style="font-size:12px;font-weight:600;color:var(--cinza-texto);margin-bottom:8px">APAGAR UM PEDIDO JÁ LANÇADO</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="text" id="apagarCompraNum" class="form-input" placeholder="Nº do pedido (ex.: DBL-008)" style="flex:1;min-width:160px"><button onclick="apagarCompraPedido()" style="padding:10px 16px;background:var(--vermelho);color:#fff;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;white-space:nowrap">Apagar pedido</button></div><div class="form-hint" style="margin-top:6px">Apaga o pedido e todas as parcelas dele. O número aparece no relatório de compras e no aviso de confirmação. Pede confirmação antes.</div></div>
           </div>
         </div>
 
@@ -914,7 +914,7 @@ function renderizarSimulacao(parcelas,impacto){
   document.getElementById('simCard').innerHTML=html;
 }
 
-async function confirmarCompra(){
+async function apagarCompraPedido(){var n=document.getElementById('apagarCompraNum').value.trim();if(!n){toast('Informe o número do pedido (ex.: DBL-008).','erro');return;}if(!confirm('Apagar o pedido '+n+' e todas as parcelas dele? Esta ação não pode ser desfeita.'))return;var r=await chamarAPI({action:'apagarCompra',numPedido:n});if(r.ok){alert('Pedido '+n+' apagado com sucesso. A tela vai recarregar.');location.reload();}else{toast(r.erro||'Erro ao apagar.','erro');}}async function apagarCompraPedido(){var n=document.getElementById('apagarCompraNum').value.trim();if(!n){toast('Informe o número do pedido (ex.: DBL-008).','erro');return;}if(!confirm('Apagar o pedido '+n+' e todas as parcelas dele? Esta ação não pode ser desfeita.'))return;var r=await chamarAPI({action:'apagarCompra',numPedido:n});if(r.ok){alert('Pedido '+n+' apagado com sucesso. A tela vai recarregar.');location.reload();}else{toast(r.erro||'Erro ao apagar.','erro');}}async function confirmarCompra(){
   const dados=getDadosCompra();if(!dados)return;
   const btn=document.querySelector('#formFornecedor .btn-confirmar');
   btn.disabled=true;btn.textContent='Salvando…';
