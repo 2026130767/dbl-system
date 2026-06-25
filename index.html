@@ -430,7 +430,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="card" style="margin-bottom:1.5rem">
         <div class="sub-tabs">
           <button class="sub-tab ativo" id="stVendas" onclick="mudarSubTab('vendas')">Vendas</button>
-          <button class="sub-tab" id="stCompras" onclick="mudarSubTab('compras')">Compras parceladas</button>
+          <button class="sub-tab" id="stCompras" onclick="mudarSubTab('compras')">Compras parceladas</button>           <button class="sub-tab" id="stVendasLanc" onclick="mudarSubTab('vendasLanc')">Vendas por lançamento</button>
         </div>
         <div class="filtro-bar">
           <span class="filtro-label">De:</span>
@@ -560,8 +560,8 @@ async function carregarDadosSheets() {
         if (!d) return;
         var iso = d.ano+'-'+String(d.mes+1).padStart(2,'0')+'-'+String(d.dia).padStart(2,'0');
         var idx2 = VENDAS_HIST.findIndex(h => String(h[0]).substring(0,10)===iso);
-        if (idx2 === -1) VENDAS_HIST.push([iso,v[1],v[2],v[3],v[4],v[5],v[6],v[7]]);
-        else VENDAS_HIST[idx2] = [iso,v[1],v[2],v[3],v[4],v[5],v[6],v[7]];
+        if (idx2 === -1) VENDAS_HIST.push([iso,v[1],v[2],v[3],v[4],v[5],v[6],v[7],v[8]]);
+        else VENDAS_HIST[idx2] = [iso,v[1],v[2],v[3],v[4],v[5],v[6],v[7],v[8]];
       });
       VENDAS_HIST.sort((a,b) => String(a[0]).localeCompare(String(b[0])));
     }
@@ -1236,7 +1236,7 @@ document.getElementById && document.addEventListener('DOMContentLoaded', functio
 function mudarSubTab(tipo){
   relAtualTipo = tipo;
   document.getElementById('stVendas').classList.toggle('ativo', tipo==='vendas');
-  document.getElementById('stCompras').classList.toggle('ativo', tipo==='compras');
+  document.getElementById('stCompras').classList.toggle('ativo', tipo==='compras');   document.getElementById('stVendasLanc').classList.toggle('ativo', tipo==='vendasLanc');
   document.getElementById('relConteudo').innerHTML='<div class="vazio">Clique em Gerar para ver o relatório.</div>';
 }
 
@@ -1244,7 +1244,7 @@ function gerarRelatorio(){
   const de = document.getElementById('relDe').value;
   const ate = document.getElementById('relAte').value;
   if(!de||!ate){toast('Informe o período.','erro');return;}
-  if(relAtualTipo==='vendas') gerarRelVendasPeriodo(de,ate);
+  if(relAtualTipo==='vendas') gerarRelVendasPeriodo(de,ate);   else if(relAtualTipo==='vendasLanc') gerarRelVendasLancamento(de,ate);
   else gerarRelComprasPeriodo(de,ate);
 }
 
@@ -1267,7 +1267,7 @@ function gerarRelVendasPeriodo(de, ate){
     </table></div>`;
 }
 
-function gerarRelComprasPeriodo(de, ate){
+function gerarRelVendasLancamento(de, ate){   const linhas = VENDAS_HIST.filter(v => v[8] && v[8] >= de && v[8] <= ate)                             .sort((a,b)=> String(a[8]).localeCompare(String(b[8])) || String(a[0]).localeCompare(String(b[0])));   if(linhas.length===0){     document.getElementById('relConteudo').innerHTML='<div class="vazio">Nenhum lançamento registrado neste período. (Só aparecem vendas lançadas a partir da ativação da data de lançamento.)</div>';     return;   }   const fmtDt = s => s.split('-').reverse().join('/');   let totB=0,totPT=0,totD=0,totDe=0,totCr=0,totPB=0,totT=0;   linhas.forEach(v=>{totB+=v[1];totPT+=v[2];totD+=v[3];totDe+=v[4];totCr+=v[5];totPB+=v[6];totT+=v[7];});   document.getElementById('relConteudo').innerHTML = `     <div style="padding:12px 16px"><span style="font-size:13px;font-weight:500;color:var(--azul)">Vendas por data de lançamento — ${fmtDt(de)} a ${fmtDt(ate)}</span></div>     <div style="overflow-x:auto">     <table class="tbl" id="tblRel">       <thead><tr><th>Lançado em</th><th>Data da venda</th><th class="r">Boleto Tel</th><th class="r">PIX Tel</th><th class="r">Dinheiro</th><th class="r">Débito</th><th class="r">Crédito</th><th class="r">PIX Balcão</th><th class="r">Total</th></tr></thead>       <tbody>${linhas.map(v=>`<tr><td>${fmtDt(v[8])}</td><td>${fmtDt(v[0])}</td><td class="r">${brl2(v[1])}</td><td class="r">${brl2(v[2])}</td><td class="r">${brl2(v[3])}</td><td class="r">${brl2(v[4])}</td><td class="r">${brl2(v[5])}</td><td class="r">${brl2(v[6])}</td><td class="r" style="font-weight:500">${brl2(v[7])}</td></tr>`).join('')}</tbody>       <tfoot><tr><td colspan="2" style="padding:8px 12px;font-weight:500">Total (${linhas.length} lançamentos)</td><td class="r">${brl2(totB)}</td><td class="r">${brl2(totPT)}</td><td class="r">${brl2(totD)}</td><td class="r">${brl2(totDe)}</td><td class="r">${brl2(totCr)}</td><td class="r">${brl2(totPB)}</td><td class="r" style="font-weight:600;color:var(--azul)">${brl2(totT)}</td></tr></tfoot>     </table></div>`; }  function gerarRelComprasPeriodo(de, ate){
   const linhas = PARCELAS_HIST.filter(p => p[2] >= de && p[2] <= ate);
   if(linhas.length===0){
     document.getElementById('relConteudo').innerHTML='<div class="vazio">Nenhuma parcela no período.</div>';
