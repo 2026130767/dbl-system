@@ -574,7 +574,7 @@ async function carregarDadosSheets() {
       });
     }
  calcularHistorico();
-const rc = await chamarAPI({action:'getCompras'});     if (rc.ok && rc.compras) { COMPRAS_HIST = rc.compras.slice(); }     const rc = await chamarAPI({action:'getCompras'});     if (rc.ok && rc.compras) { COMPRAS_HIST = rc.compras.slice(); }     if (rh.ok && rh.hist) { HIST = rh.hist; HIST_MENSAL = rh.histMensal; }
+const rc = await chamarAPI({action:'getCompras'});     if (rc.ok && rc.compras) { COMPRAS_HIST = rc.compras.slice(); }          if (rh.ok && rh.hist) { HIST = rh.hist; HIST_MENSAL = rh.histMensal; }
 dadosCarregados = true;
   } catch(e) {
     console.log('Erro ao carregar:', e);
