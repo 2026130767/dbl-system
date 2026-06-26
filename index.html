@@ -8,7 +8,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --azul:#1B2F6E;--azul-claro:#E8EDF8;--cinza-fundo:#F5F5F7;
+  --azul:#1B2F6E;--azul-claro:#E8EDF8;--cinza-fundo:#EAE7DF;
   --cinza-borda:#E0DED8;--cinza-borda-forte:#C8C6C0;--cinza-texto:#5F5E5A;
   --cinza-leve:#F1EFE8;--preto:#1B2040;--verde:#3B6D11;--verde-fundo:#EAF3DE;
   --amarelo:#854F0B;--amarelo-fundo:#FAEEDA;--vermelho:#A32D2D;
@@ -162,6 +162,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .tbl tfoot td{background:var(--dourado-claro)!important;border-top:1px solid var(--dourado)!important}
   .sub-tab.ativo{color:var(--azul)!important;border-bottom-color:var(--dourado)!important}
 
+.bloco{margin-bottom:1.25rem;background:var(--branco);border:1px solid var(--cinza-borda);border-radius:var(--radius);overflow:hidden}
+.bloco>.bloco-titulo{padding:11px 16px;border-bottom:1px solid var(--cinza-borda);margin-bottom:0}
+.bloco>.card{background:transparent;border:none;border-radius:0;overflow:visible}
+.bloco>.rodape-nota{margin:8px 16px 12px}
+.pnl-mini-wrap{display:flex;gap:10px;padding:14px 16px}
+.pnl-mini{flex:1;background:var(--cinza-leve);border-radius:var(--radius-sm);padding:11px 13px}
+.pnl-mini-lbl{font-size:12px;color:var(--cinza-texto);margin-bottom:4px}
+.pnl-mini-val{font-size:22px;font-weight:600;color:var(--azul)}
+.pnl-mini-tag{font-size:10px;color:var(--cinza-texto);background:var(--branco);border:1px solid var(--cinza-borda);border-radius:4px;padding:0 5px;margin-left:3px}
+.term-sub{background:var(--cinza-leve);padding:9px 16px 9px 13px;border-bottom:1px solid var(--cinza-borda);border-left:3px solid var(--azul);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.term-sub .l{font-size:13px;font-weight:600;color:var(--azul)}
+.term-sub .r{font-size:11px;color:var(--cinza-texto);white-space:nowrap}
+.term-body{padding:20px 18px 14px}
+.term-track-wrap{position:relative;height:34px;margin:0 4px 4px}
+.term-mark{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;transition:left .3s ease}
+.term-mark .p{font-size:15px;font-weight:600;color:var(--preto);line-height:1}
+.term-mark .tri{font-size:0;line-height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid var(--preto);margin-top:3px}
+.term-track{height:14px;border-radius:7px;background:linear-gradient(90deg,#C0392B 0%,#E8D9A0 50%,#3B6D11 100%);margin:0 4px}
+.term-ends{display:flex;justify-content:space-between;margin:5px 4px 0}
+.term-ends span{font-size:10px;color:var(--cinza-texto)}
+.term-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 16px;border-top:1px solid var(--cinza-borda)}
+.term-foot .e{font-size:12px;color:var(--cinza-texto)}
+.term-foot .e b{font-weight:600;color:var(--preto)}
+.term-tend{font-size:12px;font-weight:600;white-space:nowrap}
+.term-rotulo{font-size:11px;color:var(--cinza-texto);margin:0;padding:8px 16px 12px}
 </style>
 </head>
 <body>
@@ -234,10 +259,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
 
       <div class="bloco">
+        <div class="bloco-titulo">Termômetro de Cobertura — próximo mês</div>
+        <div class="term-sub"><span class="l" id="termSub">Boletos a receber · Fornecedor a pagar</span><span class="r">por vencimento</span></div>
+        <div class="term-body">
+          <div class="term-track-wrap"><div class="term-mark" id="termMark" style="left:0%"><span class="p" id="termPct">—</span><span class="tri"></span></div></div>
+          <div class="term-track"></div>
+          <div class="term-ends"><span>0% — não cobre</span><span>cobre tudo — 100%</span></div>
+        </div>
+        <div class="term-foot"><span class="e">Entra <b id="termReceber">—</b> em boleto · Sai <b id="termPagar">—</b> pra fornecedor</span><span class="term-tend" id="termTend"></span></div>
+        <p class="term-rotulo">Mostra quanto os boletos a receber cobrem os compromissos com fornecedores.</p>
+      </div>
+
+      <div class="bloco">
         <div class="bloco-titulo">Vendas</div>
         <div class="card">
-          <div class="linha hl"><span class="lbl-s">Média/dia <span class="tag-ref">mês corrente</span></span><span class="val" id="v_mediaDia">—</span></div>
-          <div class="linha hl"><span class="lbl-s">Projeção do mês <span class="tag-ref">mês corrente</span></span><span class="val" id="v_proj">—</span></div>
+          <div class="pnl-mini-wrap">
+            <div class="pnl-mini"><div class="pnl-mini-lbl">Média/dia <span class="pnl-mini-tag">mês corrente</span></div><div class="pnl-mini-val" id="v_mediaDia">—</div></div>
+            <div class="pnl-mini"><div class="pnl-mini-lbl">Projeção do mês <span class="pnl-mini-tag">mês corrente</span></div><div class="pnl-mini-val" id="v_proj">—</div></div>
+          </div>
           <div class="linha">
             <span class="lbl">Desvios vs média histórica</span>
             <div class="desvio-par">
@@ -692,7 +731,36 @@ function calcularHistorico(){
         '<td class="r">—</td>';
     }
   }
-}function renderizarPainel(){
+}function renderTermometro(){
+  var nm=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  var hoje=new Date();
+  var aA=hoje.getFullYear(), mA=hoje.getMonth()+1;
+  var aP=aA, mP=mA+1; if(mP>12){mP=1;aP=aA+1;}
+  var aX=aA, mX=mA-1; if(mX<1){mX=12;aX=aA-1;}
+  function ym(s){var p=String(s).substring(0,10).split('-');return{a:parseInt(p[0]),m:parseInt(p[1])};}
+  function boletoMes(a,m){var s=0;VENDAS_HIST.forEach(function(v){var d=ym(v[0]);if(d.a===a&&d.m===m)s+=Number(v[1])||0;});return s;}
+  function fornMes(a,m){var s=0;PARCELAS_HIST.forEach(function(p){var d=ym(p[2]);if(d.a===a&&d.m===m)s+=Number(p[3])||0;});return s;}
+  var receber=boletoMes(aA,mA);
+  var pagar=fornMes(aP,mP);
+  var cob=pagar>0?receber/pagar:0;
+  var posVis=Math.max(0,Math.min(1,cob));
+  var elSub=document.getElementById('termSub'); if(elSub) elSub.textContent='Boletos a receber de '+nm[mA-1]+' · Fornecedor a pagar em '+nm[mP-1];
+  var elMark=document.getElementById('termMark'); if(elMark) elMark.style.left=(posVis*100).toFixed(0)+'%';
+  var elPct=document.getElementById('termPct'); if(elPct) elPct.textContent=pagar>0?Math.round(cob*100)+'%':'—';
+  var elR=document.getElementById('termReceber'); if(elR) elR.textContent=brl(receber);
+  var elP=document.getElementById('termPagar'); if(elP) elP.textContent=brl(pagar);
+  var elT=document.getElementById('termTend');
+  if(elT){
+    var recAnt=boletoMes(aX,mX), pagAnt=fornMes(aA,mA);
+    if(pagar>0 && pagAnt>0){
+      var dpts=Math.round(cob*100)-Math.round((recAnt/pagAnt)*100);
+      if(dpts>0){elT.textContent='↑ '+dpts+' pts vs '+nm[mX-1];elT.style.color='var(--verde)';}
+      else if(dpts<0){elT.textContent='↓ '+Math.abs(dpts)+' pts vs '+nm[mX-1];elT.style.color='var(--vermelho)';}
+      else{elT.textContent='= vs '+nm[mX-1];elT.style.color='var(--cinza-texto)';}
+    } else { elT.textContent=''; }
+  }
+}
+function renderizarPainel(){
   const agora=new Date();
   document.getElementById('lblAtualizado').textContent='Atualizado '+agora.toLocaleDateString('pt-BR')+' às '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   let total=JUN_BASE.totalMes,dias=JUN_BASE.diasLancados;
@@ -724,6 +792,7 @@ function calcularHistorico(){
   document.getElementById('v_totalModHist').textContent=brl(HIST.mediaMes);
   renderizarHistoricoSheets();
   carregarComprometimento();
+  renderTermometro();
 }
 
 function renderizarHistoricoSheets() {
