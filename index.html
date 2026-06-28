@@ -858,12 +858,12 @@ function renderizarHistoricoSheets() {
   tbody.innerHTML = _linhas.map(function(m,i){
     var ehMedia = m._k==='media';
     var ehAtual = m._k===_kCorr;
-    var bg = ehMedia ? 'background:var(--cinza-leve);font-weight:600' : (ehAtual ? 'background:var(--cinza-leve)' : '');
+    var bg = ehMedia ? 'background:var(--dourado-claro);font-weight:600' : (ehAtual ? 'background:var(--cinza-leve)' : '');
     var corTotal = ehMedia ? 'color:var(--azul)' : '';
     var compras = m.compras !== null && m.compras !== undefined
       ? '<span style="color:'+(m.compras<=35?'var(--verde)':m.compras<=40?'var(--amarelo)':'var(--vermelho)')+'">'+m.compras.toFixed(1)+'%</span>'
       : '<span style="color:var(--cinza-texto)">\u2014</span>';
-    return '<tr style="border-bottom:1px solid var(--cinza-borda);'+(ehMedia?'border-top:2px solid var(--azul);':'')+bg+'">'+
+    return '<tr style="border-bottom:1px solid var(--cinza-borda);'+(ehMedia?'border-top:2px solid var(--azul);border-bottom:2px solid var(--azul);':'')+bg+'">'+
       '<td style="padding:8px 12px;font-weight:500">'+m.mes+'</td>'+
       '<td class="r" style="padding:8px 12px;font-weight:500;'+corTotal+'">'+brl(m.total)+'</td>'+
       '<td class="r" style="padding:8px 12px;color:var(--cinza-texto)">'+(m.boleto!=null?m.boleto:'\u2014')+'%</td>'+
