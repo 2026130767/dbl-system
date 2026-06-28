@@ -299,9 +299,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <div class="subtitulo"><span class="st-label">Modalidades</span><span class="st-ref">mês corrente</span></div>
           <div id="modAtual"></div>
           <div class="linha total"><span class="lbl-s">Total de vendas no mês corrente</span><span class="val-azul" id="v_totalModAtual">—</span></div>
-          <div class="subtitulo"><span class="st-label">Modalidades</span><span class="st-ref">média histórica</span></div>
-          <div id="modHist"></div>
-          <div class="linha total"><span class="lbl-s">Total modalidades</span><span class="val-azul" id="v_totalModHist">—</span></div>
         </div>
       </div>
 
@@ -785,9 +782,6 @@ function renderizarPainel(){
   const modA=[{nome:'Boleto Tel/Whats',val:b,canal:'digital'},{nome:'PIX Tel/Whats',val:pt,canal:'digital'},{nome:'Débito balcão',val:de,canal:'balcao'},{nome:'Crédito balcão',val:cr,canal:'balcao'},{nome:'Dinheiro balcão',val:di,canal:'balcao'},{nome:'PIX balcão',val:pb,canal:'balcao'}];
   document.getElementById('modAtual').innerHTML=modA.map(m=>`<div class="linha"><div class="linha-esq"><span class="lbl">${m.nome}</span><span class="tag-canal ${m.canal==='digital'?'tag-dig':'tag-bal'}">${m.canal==='digital'?'digital':'balcão'}</span></div><span class="val">${brl(m.val)} — ${pct(total>0?m.val/total:0)}</span></div>`).join('');
   document.getElementById('v_totalModAtual').textContent=brl(total);
-  const modH=[{nome:'Boleto Tel/Whats',k:'boleto',canal:'digital'},{nome:'PIX Tel/Whats',k:'pixTel',canal:'digital'},{nome:'Débito balcão',k:'debito',canal:'balcao'},{nome:'Crédito balcão',k:'credito',canal:'balcao'},{nome:'Dinheiro balcão',k:'dinheiro',canal:'balcao'},{nome:'PIX balcão',k:'pixBalcao',canal:'balcao'}];
-  document.getElementById('modHist').innerHTML=modH.map(m=>`<div class="linha"><div class="linha-esq"><span class="lbl">${m.nome}</span><span class="tag-canal ${m.canal==='digital'?'tag-dig':'tag-bal'}">${m.canal==='digital'?'digital':'balcão'}</span></div><span class="val-m">${brl(HIST.modalidades[m.k].valor)} — ${pct(HIST.modalidades[m.k].pct)}</span></div>`).join('');
-  document.getElementById('v_totalModHist').textContent=brl(HIST.mediaMes);
   renderizarHistoricoSheets();
   carregarComprometimento();
   renderTermometro();
@@ -819,17 +813,14 @@ function renderizarHistoricoSheets() {
     '2026-01':'Jan/26','2026-02':'Fev/26','2026-03':'Mar/26',
     '2026-04':'Abr/26','2026-05':'Mai/26','2026-06':'Jun/26','2026-07':'Jul/26'};
 
-  // Calcular comprometimento por mes a partir das parcelas
+  // Compras EFETUADAS por mes pela data de FATURAMENTO (c[1]=faturamento, c[3]=valor).
+  // Meses passados sao sobrescritos por FIXOS_COMPRAS abaixo; meses ao vivo (Jun/26+) usam COMPRAS_HIST.
   const compPorMes = {};
-  PARCELAS_HIST.forEach(p => {
-    const mes = p[2].substring(0,7);
+  COMPRAS_HIST.forEach(c => {
+    if (!c[1]) return;
+    const mes = String(c[1]).substring(0,7);
     if (!compPorMes[mes]) compPorMes[mes] = 0;
-    compPorMes[mes] += p[3];
-  });
-  PARCELAS_SHEETS.forEach(p => {
-    const mes = p[2].substring(0,7);
-    if (!compPorMes[mes]) compPorMes[mes] = 0;
-    compPorMes[mes] += p[3];
+    compPorMes[mes] += (Number(c[3]) || 0);
   });
 
   const FIXOS_COMPRAS = {'2025-10':46,'2025-11':65,'2025-12':67,'2026-01':39,'2026-02':51,'2026-03':43,'2026-04':49,'2026-05':50};
