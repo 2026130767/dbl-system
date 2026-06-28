@@ -47,11 +47,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .dot-live{width:6px;height:6px;border-radius:50%;background:var(--verde);display:inline-block}
 .bloco{margin-bottom:1.5rem}
 .bloco-titulo{font-size:15px;font-weight:600;color:var(--azul);margin-bottom:10px;display:flex;align-items:center;gap:7px}
-.card{background:var(--branco);border:1px solid var(--cinza-borda);border-radius:var(--radius);overflow:hidden}
+.card{background:var(--branco);border:1px solid #C7C3B7;border-radius:var(--radius);overflow:hidden}
 .subtitulo{background:var(--cinza-leve);padding:9px 16px 9px 13px;border-bottom:1px solid var(--cinza-borda);border-top:1px solid var(--cinza-borda);border-left:3px solid var(--azul);display:flex;justify-content:space-between;align-items:center}
 .subtitulo .st-label{font-size:13px;font-weight:600;color:var(--azul)}
 .subtitulo .st-ref{font-size:11px;color:var(--cinza-texto)}
-.linha{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--cinza-borda)}
+.linha{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid #D6D2C6}
 .linha:last-child{border-bottom:none}
 .linha.hl{background:var(--cinza-leve)}
 .linha.total{background:var(--cinza-leve);border-top:1px solid var(--cinza-borda-forte)}
@@ -134,8 +134,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   body{background:white}
 }
 
-  .fvn-header{background:var(--azul);padding:0;margin:0}
-  .fvn-header-inner{display:flex;align-items:center;padding:10px 1.5rem;gap:16px;max-width:860px;margin:0 auto;width:100%}
+  .fvn-header{background:transparent;padding:0;margin:0}
+  .fvn-header-inner{display:flex;align-items:center;padding:10px 1.5rem;gap:16px;max-width:860px;margin:0 auto;width:100%;background:var(--azul);border-radius:0 0 12px 12px}
   .fvn-header-text{flex:1;text-align:center}
   .fvn-logo{height:48px;width:auto}
   .fvn-header-cliente{font-size:15px;font-weight:700;color:#ffffff;line-height:1.2}
@@ -187,6 +187,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .term-foot .e b{font-weight:600;color:var(--preto)}
 .term-tend{font-size:12px;font-weight:600;white-space:nowrap}
 .term-rotulo{font-size:11px;color:var(--cinza-texto);margin:0;padding:8px 16px 12px}
+
+/* ITEM 7 — bordas das caixinhas mais firmes (contorno + divisorias), tom mais escuro. Reversivel. */
+.bloco{border:1px solid #A39B89}
+.bloco>.bloco-titulo{border-bottom:1px solid #A39B89}
 </style>
 </head>
 <body>
@@ -266,7 +270,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
           <div class="term-track"></div>
           <div class="term-ends"><span>0% — não cobre</span><span>cobre tudo — 100%</span></div>
         </div>
-        <div class="term-foot"><span class="e">Entra <b id="termReceber">—</b> em boleto · Sai <b id="termPagar">—</b> pra fornecedor</span><span class="term-tend" id="termTend"></span></div>
+        <div class="term-foot"><span class="e">Entra <b id="termReceber">—</b> em boleto · Sai <b id="termPagar">—</b> para fornecedor</span><span class="term-tend" id="termTend"></span></div>
         <p class="term-rotulo">Mostra quanto os boletos a receber cobrem os compromissos com fornecedores.</p>
       </div>
 
@@ -749,16 +753,7 @@ function calcularHistorico(){
   var elPct=document.getElementById('termPct'); if(elPct) elPct.textContent=pagar>0?Math.round(cob*100)+'%':'—';
   var elR=document.getElementById('termReceber'); if(elR) elR.textContent=brl(receber);
   var elP=document.getElementById('termPagar'); if(elP) elP.textContent=brl(pagar);
-  var elT=document.getElementById('termTend');
-  if(elT){
-    var recAnt=boletoMes(aX,mX), pagAnt=fornMes(aA,mA);
-    if(pagar>0 && pagAnt>0){
-      var dpts=Math.round(cob*100)-Math.round((recAnt/pagAnt)*100);
-      if(dpts>0){elT.textContent='↑ '+dpts+' pts vs '+nm[mX-1];elT.style.color='var(--verde)';}
-      else if(dpts<0){elT.textContent='↓ '+Math.abs(dpts)+' pts vs '+nm[mX-1];elT.style.color='var(--vermelho)';}
-      else{elT.textContent='= vs '+nm[mX-1];elT.style.color='var(--cinza-texto)';}
-    } else { elT.textContent=''; }
-  }
+  var elT=document.getElementById('termTend');if(elT){elT.textContent='';}
 }
 function renderizarPainel(){
   const agora=new Date();
@@ -767,8 +762,15 @@ function renderizarPainel(){
   let b=JUN_BASE.boleto,pt=JUN_BASE.pixTel,di=JUN_BASE.dinheiro,de=JUN_BASE.debito,cr=JUN_BASE.credito,pb=JUN_BASE.pixBalcao;
   vendas_novos.forEach(v=>{total+=v.total;dias++;b+=v.boleto;pt+=v.pixTel;di+=v.dinheiro;de+=v.debito;cr+=v.credito;pb+=v.pixBalcao;});
   const mediaDia=dias>0?total/dias:0;
-  const diasOp=25;
-  const proj=mediaDia*diasOp;
+  var TABELA_DIAS={"2026-06":[21,4],"2026-07":[22,4],"2026-08":[21,5],"2026-09":[21,4],"2026-10":[21,5],"2026-11":[19,4],"2026-12":[22,4],"2027-01":[19,5],"2027-02":[20,4],"2027-03":[22,4],"2027-04":[20,4],"2027-05":[20,5],"2027-06":[22,4],"2027-07":[21,5],"2027-08":[22,4],"2027-09":[21,4],"2027-10":[20,5],"2027-11":[20,4],"2027-12":[23,4]};
+  function _dow(iso){var q=String(iso).substring(0,10).split('-');return new Date(Date.UTC(+q[0],+q[1]-1,+q[2])).getUTCDay();}
+  var _su=0,_nu=0,_ss=0,_ns=0;for(var _k=0;_k<VENDAS_HIST.length;_k++){var _row=VENDAS_HIST[_k];var _wd=_dow(_row[0]);var _t=_row[_row.length-1];if(_wd===0){continue;}else if(_wd===6){_ss+=_t;_ns++;}else{_su+=_t;_nu++;}}
+  var mediaUtil=_nu>0?_su/_nu:0, mediaSab=_ns>0?_ss/_ns:0;
+  var _ch=agora.getFullYear()+'-'+String(agora.getMonth()+1).padStart(2,'0');
+  var _td=TABELA_DIAS[_ch];
+  var proj=_td?(mediaUtil*_td[0]+mediaSab*_td[1]):(mediaDia*25);
+  var diasOp=_td?(_td[0]+_td[1]):25;
+  (function(){var ks=Object.keys(TABELA_DIAS).sort();var ult=ks[ks.length-1];var pu=ult.split('-');var fimMs=(+pu[0])*12+(+pu[1]);var atMs=agora.getFullYear()*12+(agora.getMonth()+1);var el=document.getElementById('avisoTabela');if(!el){var c=document.querySelector('.conteudo');if(c){el=document.createElement('div');el.id='avisoTabela';el.style.cssText='display:none;background:#FFF3CD;border:1px solid #E0C36A;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#7A5C00';c.insertBefore(el,c.firstChild);}}if(el){if(fimMs-atMs<=2){el.style.display='block';el.textContent='\u26A0 A tabela de dias \u00FAteis/s\u00E1bados termina em '+ult+'. Atualize os pr\u00F3ximos meses para a proje\u00E7\u00E3o continuar correta.';}else{el.style.display='none';}}})();
   const digital=b+pt,presencial=di+de+cr+pb;
   const desvDia=HIST.mediaDia>0?(mediaDia-HIST.mediaDia)/HIST.mediaDia:0;
   const desvMes=HIST.mediaMes>0?(proj-HIST.mediaMes)/HIST.mediaMes:0;
