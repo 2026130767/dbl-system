@@ -465,9 +465,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="card" style="margin-bottom:1.5rem">
         <div class="sub-tabs">
           <button class="sub-tab ativo" id="stVendas" onclick="mudarSubTab('vendas')">Vendas</button>
-          <button class="sub-tab" id="stCompras" onclick="mudarSubTab('compras')">Compras parceladas</button>           <button class="sub-tab" id="stVendasLanc" onclick="mudarSubTab('vendasLanc')">Vendas por lançamento</button><button class="sub-tab" id="stComprasLanc" onclick="mudarSubTab('comprasLanc')">Compras por lançamento</button>
+          <button class="sub-tab" id="stCompras" onclick="mudarSubTab('compras')">Compras parceladas</button>           <button class="sub-tab" id="stVendasLanc" onclick="mudarSubTab('vendasLanc')">Vendas por lançamento</button><button class="sub-tab" id="stComprasLanc" onclick="mudarSubTab('comprasLanc')">Compras por lançamento</button><button class="sub-tab" id="stRecorrentes" onclick="abrirRelRecorrentes()">Recorrentes</button>
         </div>
-        <div class="filtro-bar">
+        <div class="filtro-bar" id="filtroBarRel">
           <span class="filtro-label">De:</span>
           <input type="date" class="filtro-input" id="relDe">
           <span class="filtro-label">Até:</span>
@@ -1263,7 +1263,61 @@ document.getElementById && document.addEventListener('DOMContentLoaded', functio
   });
 });
 
-function mudarSubTab(tipo){
+function abrirRelRecorrentes(){
+  document.getElementById('stVendas').classList.remove('ativo');
+  document.getElementById('stCompras').classList.remove('ativo');
+  var elVL=document.getElementById('stVendasLanc'); if(elVL) elVL.classList.remove('ativo');
+  var elCL=document.getElementById('stComprasLanc'); if(elCL) elCL.classList.remove('ativo');
+  document.getElementById('stRecorrentes').classList.add('ativo');
+  var fb=document.getElementById('filtroBarRel'); if(fb) fb.style.display='none';
+  renderRelRecorrentes();
+}
+
+function renderRelRecorrentes(){
+  const alvo = document.getElementById('relConteudo');
+  if(!recorrentes || recorrentes.length===0){
+    alvo.innerHTML = '<div class="vazio">Nenhum compromisso recorrente cadastrado.</div>';
+    return;
+  }
+  let html = '<div style="overflow-x:auto"><table class="tbl"><thead><tr>';
+  html += '<th>Nome</th><th>Categoria</th><th class="r">Valor</th><th class="r">Dia</th><th>Início</th><th>Status</th><th></th>';
+  html += '</tr></thead><tbody>';
+  recorrentes.forEach(rec=>{
+    const id = rec[0];
+    const nome = rec[1]||'';
+    const cat = rec[2]||'';
+    const valor = Number(rec[3])||0;
+    const dia = Number(rec[4])||0;
+    const inicio = rec[8]||'';
+    const status = rec[9]||'';
+    html += '<tr>';
+    html += '<td>'+nome+'</td>';
+    html += '<td>'+cat+'</td>';
+    html += '<td class="r">'+brl(valor)+'</td>';
+    html += '<td class="r">'+dia+'</td>';
+    html += '<td>'+inicio+'</td>';
+    html += '<td>'+status+'</td>';
+    html += '<td class="r"><button class="btn-excluir-rec" onclick="excluirRecorrente(\''+id+'\',\''+nome.replace(/'/g,"")+'\')" style="background:var(--vermelho);color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px">Excluir</button></td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  alvo.innerHTML = html;
+}
+
+async function excluirRecorrente(id, nome){
+  if(!confirm('Excluir o recorrente "'+nome+'"? Ele deixará de aparecer em todos os meses. Esta ação não pode ser desfeita.')) return;
+  const r = await chamarAPI({action:'apagarRecorrente', id:id});
+  if(r && r.ok){
+    toast('Recorrente excluído.');
+    const rr = await chamarAPI({action:'getRecorrentes'});
+    if(rr && rr.ok && rr.recorrentes){ recorrentes = rr.recorrentes; }
+    renderRelRecorrentes();
+  } else {
+    toast((r&&r.erro)?r.erro:'Erro ao excluir.','erro');
+  }
+}function mudarSubTab(tipo){
+  var fbR=document.getElementById('filtroBarRel'); if(fbR) fbR.style.display='';
+  var elRec=document.getElementById('stRecorrentes'); if(elRec) elRec.classList.remove('ativo');
   relAtualTipo = tipo;
   document.getElementById('stVendas').classList.toggle('ativo', tipo==='vendas');
   document.getElementById('stCompras').classList.toggle('ativo', tipo==='compras');   document.getElementById('stVendasLanc').classList.toggle('ativo', tipo==='vendasLanc');   document.getElementById('stComprasLanc').classList.toggle('ativo', tipo==='comprasLanc');
