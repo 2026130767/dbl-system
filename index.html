@@ -442,6 +442,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             <div><div class="form-label">Intervalo em dias</div></div>
             <input type="number" class="form-input" id="recIntervaloDias" placeholder="Ex: 30" min="1">
           </div>
+<div class="form-linha">
+            <div><div class="form-label">Data de início</div><div class="form-hint">A partir de quando vale</div></div>
+            <input type="date" class="form-input" id="recInicio">
+          </div>
           <div class="form-acoes">
             <button class="btn-confirmar" onclick="confirmarRecorrente()">Confirmar compromisso</button>
           </div>
@@ -1008,18 +1012,31 @@ function getDadosCompra(){
   return{dataFaturamento,fornecedor,prazo,valor};
 }
 
-function confirmarRecorrente(){
+async function confirmarRecorrente(){
   const nome=document.getElementById('recNome').value.trim();
   const cat=document.getElementById('recCategoria').value;
   const valor=Number(document.getElementById('recValor').value)||0;
   const dia=parseInt(document.getElementById('recDia').value)||0;
   const tipo=document.getElementById('recTipo').value;
+  const inicio=document.getElementById('recInicio').value;
+  const vezes=parseInt(document.getElementById('recVezes').value)||0;
+  const intervaloDias=parseInt(document.getElementById('recIntervaloDias').value)||0;
   if(!nome){toast('Informe o nome.','erro');return;}
   if(valor<=0){toast('Informe o valor.','erro');return;}
   if(dia<1||dia>31){toast('Informe o dia de vencimento.','erro');return;}
-  recorrentes.push({nome,cat,valor,dia,tipo});
-  toast('Compromisso recorrente registrado!');
-  document.getElementById('recNome').value='';document.getElementById('recValor').value='';document.getElementById('recDia').value='';
+  if(!inicio){toast('Informe a data de início.','erro');return;}
+  const r=await chamarAPI({action:'lancarRecorrente',nome,categoria:cat,valor,diaVenc:dia,tipo,vezes,intervaloDias,dataInicio:inicio});
+  if(r && r.ok){
+    toast('Compromisso recorrente registrado!');
+    document.getElementById('recNome').value='';
+    document.getElementById('recValor').value='';
+    document.getElementById('recDia').value='';
+    document.getElementById('recInicio').value='';
+    document.getElementById('recVezes').value='';
+    document.getElementById('recIntervaloDias').value='';
+  } else {
+    toast((r&&r.erro)?r.erro:'Erro ao salvar.','erro');
+  }
 }
 
 let COMPRAS_HIST=[]; const VENDAS_HIST=[
