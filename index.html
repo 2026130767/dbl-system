@@ -611,6 +611,8 @@ async function carregarDadosSheets() {
  calcularHistorico();
 const rc = await chamarAPI({action:'getCompras'});     if (rc.ok && rc.compras) { COMPRAS_HIST = rc.compras.slice(); }          if (rh.ok && rh.hist) { HIST = rh.hist; HIST_MENSAL = rh.histMensal; }
 dadosCarregados = true;
+const rr = await chamarAPI({action:'getRecorrentes'});
+      if (rr && rr.ok && rr.recorrentes) { recorrentes = rr.recorrentes; }
   } catch(e) {
     console.log('Erro ao carregar:', e);
   }
@@ -1406,8 +1408,36 @@ function gerarFluxo(){
     }
   });
 
-  // Recorrentes (da sessao - simplificado)
-  // Por ora usa lista vazia - será expandido quando recorrentes estiverem no Sheets
+ // Recorrentes (expandidos do Sheets)
+  const hojeRec = new Date();
+  const limiteRec = new Date(hojeRec.getFullYear(), hojeRec.getMonth()+24, hojeRec.getDate());
+  recorrentes.forEach(rec=>{
+    const nomeRec = rec[1];
+    const valorRec = Number(rec[3])||0;
+    const diaRec = Number(rec[4])||0;
+    const inicioRaw = String(rec[8]||'');
+    if(!nomeRec || valorRec<=0 || diaRec<1) return;
+    let inicioRec = null;
+    if(inicioRaw){
+      const pi = inicioRaw.indexOf('/')>-1 ? inicioRaw.split('/') : inicioRaw.split('-');
+      if(inicioRaw.indexOf('/')>-1){ inicioRec = new Date(Number(pi[2]),Number(pi[1])-1,Number(pi[0])); }
+      else { inicioRec = new Date(Number(pi[0]),Number(pi[1])-1,Number(pi[2])); }
+    }
+    let mCur = new Date(deDt.getFullYear(), deDt.getMonth(), 1);
+    while(mCur <= ateDt && mCur <= limiteRec){
+      const ano = mCur.getFullYear(), mes = mCur.getMonth();
+      const ultimoDia = new Date(ano, mes+1, 0).getDate();
+      const diaEfetivo = Math.min(diaRec, ultimoDia);
+      const vencBase = new Date(ano, mes, diaEfetivo);
+      const vencAdj = proximaSegunda(vencBase);
+      const vencISO = toISO(vencAdj);
+      const dentroInicio = !inicioRec || vencBase >= inicioRec;
+      if(dentroInicio && vencISO >= de && vencISO <= ate){
+        addSaida(vencISO, nomeRec+' (recorrente)', valorRec);
+      }
+      mCur = new Date(ano, mes+1, 1);
+    }
+  }); 
 
   // Montar linhas do fluxo
   const linhas = [];
