@@ -601,7 +601,7 @@ function pct(v){if(!v&&v!==0)return'—';return(Number(v)*100).toFixed(1)+'%';}
 function desv(v){if(!v&&v!==0)return'—';const p=(Number(v)*100).toFixed(1);return(v>=0?'+':'')+p+'%';}
 function corDesv(v){return v>0.01?'up':v<-0.01?'dn':'';}
 function toast(msg,tipo){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(tipo==='erro'?' erro':'')+' ativo';setTimeout(()=>t.className='toast',3000);}
-function dataHoje(){return new Date().toISOString().split('T')[0];}
+function dataHoje(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
 async function chamarAPI(dados){
   if(senhaAtual && !dados.senha) dados.senha = senhaAtual; const r=await fetch(API+'?action='+dados.action,{method:'POST',body:JSON.stringify(dados),headers:{'Content-Type':'text/plain'}});
