@@ -307,8 +307,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
               <th class="r">Dinheiro</th><th class="r">Débito</th><th class="r">Crédito</th><th class="r">PIX Bal</th><th class="r">% Compras</th>
             </tr></thead>
             <tbody id="tabelaHistorico"></tbody>
-            
+
           </table>
+        </div>
+      </div>
+
+      <div class="bloco">
+        <div class="bloco-titulo">Fotos mensais do painel</div>
+        <div class="card" style="margin-bottom:1.5rem">
+          <div class="filtro-bar">
+            <span class="filtro-label">O app guarda sozinho os números deste painel. A última foto de cada mês fica registrada.</span>
+            <button class="btn-gerar" onclick="verFotosPainel()" style="margin-left:auto">Ver fotos</button>
+            <button class="btn-excel" onclick="exportarFotosPainel()">↓ Excel</button>
+          </div>
+          <div id="fotosConteudo"></div>
         </div>
       </div>
     </div>
@@ -809,6 +821,7 @@ function calcularHistorico(){
   var elR=document.getElementById('termReceber'); if(elR) elR.textContent=brl(receber);
   var elP=document.getElementById('termPagar'); if(elP) elP.textContent=brl(pagar);
   var elT=document.getElementById('termTend');if(elT){elT.textContent='';}
+  FOTO_PAINEL.term={receber:receber,pagar:pagar,cob:cob};
 }
 function renderizarPainel(){
   const agora=new Date();
@@ -844,9 +857,76 @@ function renderizarPainel(){
   const modA=[{nome:'Boleto Tel/Whats',val:b,canal:'digital'},{nome:'PIX Tel/Whats',val:pt,canal:'digital'},{nome:'Débito balcão',val:de,canal:'balcao'},{nome:'Crédito balcão',val:cr,canal:'balcao'},{nome:'Dinheiro balcão',val:di,canal:'balcao'},{nome:'PIX balcão',val:pb,canal:'balcao'}];
   document.getElementById('modAtual').innerHTML=modA.map(m=>`<div class="linha"><div class="linha-esq"><span class="lbl">${m.nome}</span><span class="tag-canal ${m.canal==='digital'?'tag-dig':'tag-bal'}">${m.canal==='digital'?'digital':'balcão'}</span></div><span class="val">${brl(m.val)} — ${pct(total>0?m.val/total:0)}</span></div>`).join('');
   document.getElementById('v_totalModAtual').textContent=brl(total);
+  FOTO_PAINEL={total:total,dias:dias,mediaDia:mediaDia,proj:proj,desvDia:desvDia,desvMes:desvMes,histDia:HIST.mediaDia,histMes:HIST.mediaMes,digital:digital,presencial:presencial,b:b,pt:pt,di:di,de:de,cr:cr,pb:pb};
   renderizarHistoricoSheets();
   carregarComprometimento();
   renderTermometro();
+  salvarFotoPainel();
+}
+
+var FOTO_PAINEL={};
+var _ultimaFotoEnviada='';
+function salvarFotoPainel(){
+  const f=FOTO_PAINEL;
+  if(!dadosCarregados||!senhaAtual||!DADOS_SHEETS.length||!f.comp||!f.term)return;
+  const r2=x=>Math.round((Number(x)||0)*100)/100, p1=x=>Math.round((Number(x)||0)*1000)/10;
+  const selo=s=>s==='ok'?'Ok':s==='atencao'?'Atenção':'Acima';
+  const agora=new Date();
+  const mes=agora.getFullYear()+'-'+String(agora.getMonth()+1).padStart(2,'0');
+  const c=f.comp;
+  const pares=[
+    ['Atualizado em',agora.toLocaleDateString('pt-BR')+' '+agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})],
+    ['Vendas do mês',r2(f.total)],['Dias lançados',f.dias],['Média/dia',r2(f.mediaDia)],['Projeção do mês',r2(f.proj)],
+    ['Desvio diário (%)',p1(f.desvDia)],['Desvio mensal (%)',p1(f.desvMes)],
+    ['Média/dia histórica',r2(f.histDia)],['Média/mês histórica',r2(f.histMes)],
+    ['Vendas digitais',r2(f.digital)],['Vendas presenciais',r2(f.presencial)],
+    ['Boleto Tel/Whats',r2(f.b)],['PIX Tel/Whats',r2(f.pt)],['Dinheiro balcão',r2(f.di)],['Débito balcão',r2(f.de)],['Crédito balcão',r2(f.cr)],['PIX balcão',r2(f.pb)],
+    ['Compras do mês',r2(c[0].compras)],['Comprometimento do mês (%)',p1(c[0].pct)],['Selo do mês',selo(c[0].status)],
+    ['Mês +1: compras',r2(c[1].compras)],['Mês +1: comprometimento (%)',p1(c[1].pct)],['Mês +1: selo',selo(c[1].status)],
+    ['Mês +2: compras',r2(c[2].compras)],['Mês +2: comprometimento (%)',p1(c[2].pct)],['Mês +2: selo',selo(c[2].status)],
+    ['Termômetro: boletos a receber',r2(f.term.receber)],['Termômetro: fornecedor a pagar mês seguinte',r2(f.term.pagar)],['Termômetro: cobertura (%)',f.term.pagar>0?Math.round(f.term.cob*100):'']
+  ];
+  const valores=pares.map(p=>p[1]);
+  const chave=mes+JSON.stringify(valores.slice(1));
+  if(chave===_ultimaFotoEnviada)return;
+  _ultimaFotoEnviada=chave;
+  chamarAPI({action:'salvarPainel',mes:mes,cabecalho:pares.map(p=>p[0]),valores:valores})
+    .then(r=>{if(!r||!r.ok)_ultimaFotoEnviada='';})
+    .catch(()=>{_ultimaFotoEnviada='';});
+}
+
+async function verFotosPainel(){
+  const div=document.getElementById('fotosConteudo');
+  div.innerHTML='<div class="vazio">Carregando…</div>';
+  let r;
+  try{ r=await chamarAPI({action:'getPainelMensal'}); }catch(e){ div.innerHTML='<div class="vazio">Erro de conexão.</div>'; return; }
+  if(!r.ok){ div.innerHTML='<div class="vazio">'+(r.erro||'Erro ao carregar.')+'</div>'; return; }
+  const porMes={}; (r.linhas||[]).forEach(l=>{porMes[l[0]]=l;});
+  const meses=Object.keys(porMes).sort();
+  if(meses.length===0){ div.innerHTML='<div class="vazio">Nenhuma foto guardada ainda.</div>'; return; }
+  const nm=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const rotulo=k=>{const p=k.split('-');return nm[+p[1]-1]+'/'+p[0].slice(2);};
+  const fmt=(cab,v)=>{
+    if(v===''||v===null||v===undefined)return '—';
+    if(typeof v!=='number')return String(v).replace(/</g,'&lt;');
+    if(cab.indexOf('(%)')>=0)return v.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+    if(cab==='Dias lançados')return String(v);
+    return brl2(v);
+  };
+  const cab=r.cabecalho;
+  div.innerHTML=`<div style="overflow-x:auto"><table class="tbl" id="tblFotos">
+    <thead><tr><th>Indicador</th>${meses.map(m=>`<th class="r">${rotulo(m)}</th>`).join('')}</tr></thead>
+    <tbody>${cab.slice(1).map((c,i)=>`<tr><td>${c}</td>${meses.map(m=>`<td class="r">${fmt(c,porMes[m][i+1])}</td>`).join('')}</tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function exportarFotosPainel(){
+  const tabela=document.getElementById('tblFotos');
+  if(!tabela){toast('Clique em Ver fotos primeiro.','erro');return;}
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.table_to_sheet(tabela);
+  XLSX.utils.book_append_sheet(wb,ws,'Fotos do painel');
+  XLSX.writeFile(wb,'FotosPainel_DBL.xlsx');
 }
 
 function renderizarHistoricoSheets() {
@@ -968,6 +1048,7 @@ function carregarComprometimento(){
     const status=pctv<=0.55?'ok':pctv<=0.60?'atencao':'acima';
     comp.push({mes:nomes[k]||k,tipo:tipo,vendas:vendas,compras:compras,pct:pctv,status:status});
   }
+  FOTO_PAINEL.comp=comp;
   renderizarComprometimento(comp);
 }
 
